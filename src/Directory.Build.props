@@ -1,0 +1,12 @@
+<Project>
+
+  <PropertyGroup>
+    <Product>PowerShell Data Protection Module</Product>
+    <Description>A PowerShell module that utilizes Microsoft Data Protection to encrypt and decrypt secrets.</Description>
+    <Company>Joseph L. Casale</Company>
+    <Copyright>Copyright (c) Joseph L. Casale. All rights reserved.</Copyright>
+  </PropertyGroup>
+
+  <Import Project=".\version.props" Condition="Exists('.\version.props')" />
+
+</Project>

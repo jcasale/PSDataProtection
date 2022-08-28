@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "PowerShell": {
+      "commandName": "Executable",
+      "executablePath": "c:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "commandLineArgs": "-NoExit -Command \"Import-Module '$(TargetPath)' -Verbose"
+    },
+    "PowerShell ISE": {
+      "commandName": "Executable",
+      "executablePath": "c:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell_ise.exe",
+      "commandLineArgs": "-File Debug.ps1"
+    }
+  }
+}
