@@ -24,9 +24,17 @@ PS> $protected |Read-DataProtectionSecret -Scope CurrentUser
 Hello World!
 ```
 
-This command unprotects a secret that was protected using CurrentUser scope.
+This command unprotects a secret that was protected using CurrentUser scope and returns a string.
 
-### ----------- Example 2: Unprotect a secret stored on disk -----------
+### ----------- Example 2: Unprotect a secret -----------
+
+```powershell
+PS> $secureString = $protected |Read-DataProtectionSecret -Scope CurrentUser -AsSecureString
+```
+
+This command unprotects a secret that was protected using CurrentUser scope and returns a SecureString.
+
+### ----------- Example 3: Unprotect a secret stored on disk -----------
 
 Ensure PowerShell is running in the context of the account that protected the data.
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Security;
 using System.Security.Cryptography;
 using PSDataProtection;
 using Xunit;
@@ -72,6 +73,25 @@ public class IntegrationTests : IDisposable
         Assert.Single(results);
 
         Assert.Equal(data, results[0]);
+    }
+
+    [Theory]
+    [MemberData(nameof(NewDataProtectionSecretArguments))]
+    public void ResultAsSecureStringShouldPass(string data, DataProtectionScope scope)
+    {
+        this.powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), data.ToSecureString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope)
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.AsSecureString), true);
+
+        var results = this.powerShell.Invoke<SecureString>();
+
+        Assert.Single(results);
+
+        Assert.Equal(data, results[0].ToPlainString());
     }
 
     [Theory]
