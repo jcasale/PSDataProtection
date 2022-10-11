@@ -17,7 +17,10 @@ public static class Extensions
         }
         finally
         {
-            Marshal.ZeroFreeGlobalAllocUnicode(ptr);
+            if (ptr != IntPtr.Zero)
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(ptr);
+            }
         }
     }
 
