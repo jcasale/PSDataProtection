@@ -75,6 +75,15 @@ jobs:
         shell: cmd
         run: light.exe -nologo -out ps-data-protection.msi -ext WixUIExtension.dll -spdb package\Fragment.wixobj package\Product.wixobj
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            name: ps-data-protection
+            path: |
+                ./docs/
+                ./ps-data-protection.msi
+            if-no-files-found: error
+
       - name: Test installer
         run: |
             Start-Process msiexec.exe -ArgumentList '/i','ps-data-protection.msi','/qn' -Wait -NoNewWindow -ErrorAction Stop
