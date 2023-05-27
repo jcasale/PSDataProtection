@@ -51,7 +51,7 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         string insecurePassword;
         try
         {
-            insecurePassword = Marshal.PtrToStringAuto(bString);
+            insecurePassword = Marshal.PtrToStringBSTR(bString);
         }
         catch (Exception e)
         {
