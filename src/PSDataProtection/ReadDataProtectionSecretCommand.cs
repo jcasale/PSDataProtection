@@ -81,7 +81,7 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
         {
             this.ThrowTerminatingError(new ErrorRecord(
                 e,
-                "Base64DecodingError",
+                "DecodingError",
                 ErrorCategory.NotSpecified,
                 null));
 
