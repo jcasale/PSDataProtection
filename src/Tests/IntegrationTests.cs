@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 using PSDataProtection;
 using Xunit;
 
-public class IntegrationTests : IDisposable
+public sealed class IntegrationTests : IDisposable
 {
     private readonly Runspace runSpace;
     private readonly PowerShell powerShell;

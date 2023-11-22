@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using PSDataProtection;
 using Xunit;
 
-public class ParameterTests : IDisposable
+public sealed class ParameterTests : IDisposable
 {
     private readonly Runspace runSpace;
     private readonly PowerShell powerShell;
