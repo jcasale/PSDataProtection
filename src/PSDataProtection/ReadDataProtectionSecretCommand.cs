@@ -6,8 +6,8 @@ using System.Security;
 using System.Security.Cryptography;
 
 [Cmdlet(VerbsCommunications.Read, "DataProtectionSecret", DefaultParameterSetName = StringParameterSetName)]
-[OutputType(typeof(string), ParameterSetName = new []{ StringParameterSetName })]
-[OutputType(typeof(SecureString), ParameterSetName = new []{ SecureStringParameterSetName })]
+[OutputType(typeof(string), ParameterSetName = new[] { StringParameterSetName })]
+[OutputType(typeof(SecureString), ParameterSetName = new[] { SecureStringParameterSetName })]
 public class ReadDataProtectionSecretCommand : PSCmdlet
 {
     private readonly System.Text.UTF8Encoding encoding = new();
@@ -81,7 +81,7 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
         {
             this.ThrowTerminatingError(new ErrorRecord(
                 e,
-                "Base64DecodingError",
+                "DecodingError",
                 ErrorCategory.NotSpecified,
                 null));
 
@@ -100,7 +100,10 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
 
             case SecureStringParameterSetName:
 
+#pragma warning disable CA2000
+                // The caller must dispose the object when ready.
                 var secureString = new SecureString();
+#pragma warning restore CA2000
 
                 foreach (var c in decoded)
                 {

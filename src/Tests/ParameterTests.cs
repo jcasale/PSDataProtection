@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using PSDataProtection;
 using Xunit;
 
-public class ParameterTests : IDisposable
+public sealed class ParameterTests : IDisposable
 {
     private readonly Runspace runSpace;
     private readonly PowerShell powerShell;
@@ -32,9 +32,11 @@ public class ParameterTests : IDisposable
     [Fact]
     public void NewDataProtectionSecretWithEmptySecureStringShouldThrow()
     {
+        using var secureString = string.Empty.ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), string.Empty.ToSecureString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
             .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
 
         var exception = Record.Exception(this.powerShell.Invoke);
@@ -46,9 +48,11 @@ public class ParameterTests : IDisposable
     [Fact]
     public void NewDataProtectionSecretWithInvalidScopeShouldThrow()
     {
+        using var secureString = Guid.NewGuid().ToString().ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), Guid.NewGuid().ToString().ToSecureString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
             .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), Guid.NewGuid().ToString());
 
         var exception = Record.Exception(this.powerShell.Invoke);

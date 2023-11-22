@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 using PSDataProtection;
 using Xunit;
 
-public class IntegrationTests : IDisposable
+public sealed class IntegrationTests : IDisposable
 {
     private readonly Runspace runSpace;
     private readonly PowerShell powerShell;
@@ -41,13 +41,15 @@ public class IntegrationTests : IDisposable
     [MemberData(nameof(NewDataProtectionSecretArguments))]
     public void ArgumentsAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
     {
+        using var secureString = data.ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
             .AddCommand("Read-DataProtectionSecret")
             .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
 
         var psObject = new PSObject();
-        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.SecureString), data.ToSecureString()));
+        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.SecureString), secureString));
         psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.Scope), scope));
 
         var results = this.powerShell.Invoke<string>(new[] { psObject });
@@ -61,9 +63,11 @@ public class IntegrationTests : IDisposable
     [MemberData(nameof(NewDataProtectionSecretArguments))]
     public void ArgumentsAsParametersShouldPass(string data, DataProtectionScope scope)
     {
+        using var secureString = data.ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), data.ToSecureString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
             .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
             .AddCommand("Read-DataProtectionSecret")
             .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
@@ -79,9 +83,11 @@ public class IntegrationTests : IDisposable
     [MemberData(nameof(NewDataProtectionSecretArguments))]
     public void ResultAsSecureStringShouldPass(string data, DataProtectionScope scope)
     {
+        using var secureString = data.ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), data.ToSecureString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
             .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
             .AddCommand("Read-DataProtectionSecret")
             .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope)
@@ -98,9 +104,11 @@ public class IntegrationTests : IDisposable
     [MemberData(nameof(NewDataProtectionSecretArguments))]
     public void ScopeInPipelineShouldPass(string data, DataProtectionScope scope)
     {
+        using var secureString = data.ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), data.ToSecureString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
             .AddCommand("Read-DataProtectionSecret")
             .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
 
@@ -115,13 +123,15 @@ public class IntegrationTests : IDisposable
     [MemberData(nameof(NewDataProtectionSecretArguments))]
     public void SecureStringInPipelineShouldPass(string data, DataProtectionScope scope)
     {
+        using var secureString = data.ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
             .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
             .AddCommand("Read-DataProtectionSecret")
             .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
 
-        var results = this.powerShell.Invoke<string>(new[]{ data.ToSecureString() });
+        var results = this.powerShell.Invoke<string>(new[] { secureString });
 
         Assert.Single(results);
 
@@ -132,9 +142,11 @@ public class IntegrationTests : IDisposable
     [MemberData(nameof(NewDataProtectionSecretArguments))]
     public void ScopeAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
     {
+        using var secureString = data.ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), data.ToSecureString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
             .AddCommand("Read-DataProtectionSecret")
             .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
 
@@ -152,6 +164,8 @@ public class IntegrationTests : IDisposable
     [MemberData(nameof(NewDataProtectionSecretArguments))]
     public void SecureStringAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
     {
+        using var secureString = data.ToSecureString();
+
         this.powerShell
             .AddCommand("New-DataProtectionSecret")
             .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
@@ -159,7 +173,7 @@ public class IntegrationTests : IDisposable
             .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
 
         var psObject = new PSObject();
-        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.SecureString), data.ToSecureString()));
+        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.SecureString), secureString));
 
         var results = this.powerShell.Invoke<string>(new[] { psObject });
 
