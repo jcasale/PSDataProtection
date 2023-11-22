@@ -8,6 +8,11 @@ public static class Extensions
 {
     public static string ToPlainString(this SecureString input)
     {
+        if (input is null)
+        {
+            throw new ArgumentNullException(nameof(input));
+        }
+
         var ptr = IntPtr.Zero;
         try
         {
@@ -26,6 +31,11 @@ public static class Extensions
 
     public static SecureString ToSecureString(this string input)
     {
+        if (input is null)
+        {
+            throw new ArgumentNullException(nameof(input));
+        }
+
         var secureString = new SecureString();
 
         foreach (var c in input)
