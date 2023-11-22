@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security;
 
-public static class Extensions
+public static class TestExtensions
 {
     public static string ToPlainString(this SecureString input)
     {
