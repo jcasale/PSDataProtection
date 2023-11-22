@@ -1,10 +1,11 @@
-﻿<Project InitialTargets="GetVersionFromGit" Sdk="Microsoft.NET.Sdk">
+<Project InitialTargets="GetVersionFromGit" Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <AssemblyName>PSDataProtection</AssemblyName>
     <LangVersion>preview</LangVersion>
     <AnalysisLevel>preview-All</AnalysisLevel>
+    <NoWarn>CA1031</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
