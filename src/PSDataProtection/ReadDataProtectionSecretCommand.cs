@@ -100,7 +100,10 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
 
             case SecureStringParameterSetName:
 
+#pragma warning disable CA2000
+                // The caller must dispose the object when ready.
                 var secureString = new SecureString();
+#pragma warning restore CA2000
 
                 foreach (var c in decoded)
                 {
