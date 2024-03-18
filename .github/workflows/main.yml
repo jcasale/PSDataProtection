@@ -70,7 +70,7 @@ jobs:
         run: wix.exe msi validate ps-data-protection.msi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ps-data-protection
           path: |
@@ -100,6 +100,7 @@ jobs:
 
       - name: Publish release
         if: github.ref_type == 'tag'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: ps-data-protection.msi
+        run: gh.exe release create v${{ steps.version.outputs.version }} --title v${{ steps.version.outputs.version }} --notes 'PowerShell data protection module.' ps-data-protection.msi
+        env:
+            # Requires a personal access token with a fine-grained permission of contents:read/write.
+            GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
