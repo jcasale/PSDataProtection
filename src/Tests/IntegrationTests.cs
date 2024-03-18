@@ -1,7 +1,6 @@
 namespace Tests;
 
 using System;
-using System.Collections.Generic;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Security;
@@ -31,11 +30,11 @@ public sealed class IntegrationTests : IDisposable
         this.powerShell.Runspace = this.runSpace;
     }
 
-    public static IEnumerable<object[]> NewDataProtectionSecretArguments()
+    public static TheoryData<string, DataProtectionScope> NewDataProtectionSecretArguments() => new()
     {
-        yield return new object[] { Guid.NewGuid().ToString(), DataProtectionScope.CurrentUser };
-        yield return new object[] { Guid.NewGuid().ToString(), DataProtectionScope.LocalMachine };
-    }
+        { Guid.NewGuid().ToString(), DataProtectionScope.CurrentUser },
+        { Guid.NewGuid().ToString(), DataProtectionScope.LocalMachine }
+    };
 
     [Theory]
     [MemberData(nameof(NewDataProtectionSecretArguments))]
