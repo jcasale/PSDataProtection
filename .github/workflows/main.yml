@@ -23,15 +23,10 @@ jobs:
 
       - name: Setup wix
         run: |
-          dotnet.exe tool install --global wix
+          dotnet.exe tool install --global wix --version 5.0.2 --verbosity diag
 
-          wix.exe extension add WixToolset.UI.wixext --global
-
-          nuget.exe install WixToolset.Heat -NonInteractive
-          Get-ChildItem -Path .\WixToolset.Heat* -Recurse |
-            Where-Object { $_.FullName.EndsWith('x64\heat.exe') } |
-            Select-Object -ExpandProperty DirectoryName |
-            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          wix.exe extension add WixToolset.UI.wixext/5.0.2 --global
+          wix.exe extension list --global
 
       - name: Generate version property
         id: version
@@ -42,7 +37,7 @@ jobs:
           echo "version=$version" >> $env:GITHUB_OUTPUT
 
       - name: Run tests
-        run: dotnet.exe test .\src\PSDataProtection.sln
+        run: dotnet.exe test .\src\PSDataProtection.sln --configuration Release --runtime win-x64
 
       - name: Clean solution
         run: dotnet.exe clean .\src\PSDataProtection.sln --configuration Release
@@ -60,45 +55,22 @@ jobs:
           Update-MarkdownHelp ./docs -UpdateInputOutput -Force -ErrorAction Stop
           New-ExternalHelp ./docs -OutputPath ./publish -ErrorAction Stop
 
-      - name: Harvest installer
-        run: |
-          heat.exe `
-            dir `
-            .\publish `
-            -nologo `
-            -cg ProductComponents `
-            -dr INSTALLDIR `
-            -var var.ProductSource `
-            -g1 `
-            -ag `
-            -ke `
-            -srd `
-            -sfrag `
-            -sreg `
-            -o Fragment.wxs
-
       - name: Build installer
         run: |
           wix.exe `
             build `
             -arch x64 `
-            -src Fragment.wxs src\Product.wxs `
-            -d ProductSource=publish `
+            -src src\Product.wxs `
+            -d ProductSource="$(Resolve-Path ./publish)" `
             -d ProductVersion="${{ steps.version.outputs.version }}" `
             -ext WixToolset.UI.wixext `
             -out ps-data-protection.msi
-
-      - name: Update installer
-        run: |
-          $path = Resolve-Path 'C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86\msiinfo.exe' -ErrorAction Stop
-
-          & $path ps-data-protection.msi -t "PowerShell Data Protection Module" -o "PSDataProtection v${{ steps.version.outputs.version }}"
 
       - name: Validate installer
         run: wix.exe msi validate ps-data-protection.msi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ps-data-protection
           path: |
@@ -128,6 +100,7 @@ jobs:
 
       - name: Publish release
         if: github.ref_type == 'tag'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: ps-data-protection.msi
+        run: gh.exe release create v${{ steps.version.outputs.version }} --title v${{ steps.version.outputs.version }} --notes 'PowerShell data protection module.' ps-data-protection.msi
+        env:
+            # Requires a personal access token with a fine-grained permission of contents:read/write.
+            GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}

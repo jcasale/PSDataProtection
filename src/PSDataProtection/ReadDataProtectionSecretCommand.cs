@@ -6,8 +6,8 @@ using System.Security;
 using System.Security.Cryptography;
 
 [Cmdlet(VerbsCommunications.Read, "DataProtectionSecret", DefaultParameterSetName = StringParameterSetName)]
-[OutputType(typeof(string), ParameterSetName = new[] { StringParameterSetName })]
-[OutputType(typeof(SecureString), ParameterSetName = new[] { SecureStringParameterSetName })]
+[OutputType(typeof(string), ParameterSetName = [StringParameterSetName])]
+[OutputType(typeof(SecureString), ParameterSetName = [SecureStringParameterSetName])]
 public class ReadDataProtectionSecretCommand : PSCmdlet
 {
     private readonly System.Text.UTF8Encoding encoding = new();
