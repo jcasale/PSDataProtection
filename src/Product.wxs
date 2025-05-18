@@ -1,49 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package Name="PowerShell Data Protection Module"
-           Language="1033"
-           Version="$(var.ProductVersion)"
-           Manufacturer="Joseph L. Casale"
-           UpgradeCode="12d8a258-6fad-4f0e-9f1d-6062ded1e8e9">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+  xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="PowerShell Data Protection Module" Language="1033" Version="$(var.ProductVersion)" Manufacturer="Joseph L. Casale" UpgradeCode="12d8a258-6fad-4f0e-9f1d-6062ded1e8e9">
     <SummaryInformation Description="A PowerShell module that utilizes Microsoft Data Protection to encrypt and decrypt secrets." Comments="PSDataProtection v$(var.ProductVersion)" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <Media Id="1" Cabinet="Data.cab" EmbedCab="yes" CompressionLevel="high" />
 
-    <Feature Id="Product"
-             Description="PowerShell Data Protection Module"
-             Title="PSDataProtection"
-             AllowAbsent="no">
+    <Feature Id="Product" Description="PowerShell Data Protection Module" Title="PSDataProtection" AllowAbsent="no">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
     <UI>
-      <ui:WixUI Id="WixUI_FeatureTree_NoLicense" />
+      <ui:WixUI Id="WixUI_InstallDir_NoLicense" InstallDirectory="INSTALLFOLDER" />
     </UI>
 
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="WindowsPowerShell" Name="WindowsPowerShell">
         <Directory Id="Modules" Name="Modules">
           <Directory Id="PSDataProtection" Name="PSDataProtection">
-            <Directory Id="INSTALLDIR" Name="$(var.ProductVersion)" />
+            <Directory Id="INSTALLFOLDER" Name="$(var.ProductVersion)" />
           </Directory>
         </Directory>
       </Directory>
     </StandardDirectory>
 
-    <ComponentGroup Id="ProductComponents" Directory="INSTALLDIR">
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Files Include="$(var.ProductSource)\**" />
     </ComponentGroup>
   </Package>
 
   <?foreach WIXUIARCH in X86;X64;A64?>
-    <Fragment>
-      <UI Id="WixUI_FeatureTree_NoLicense_$(WIXUIARCH)" />
-      <UIRef Id="WixUI_FeatureTree_NoLicense" />
-    </Fragment>
+  <Fragment>
+    <UI Id="WixUI_InstallDir_NoLicense_$(WIXUIARCH)">
+      <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath_$(WIXUIARCH)" Order="3" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath_$(WIXUIARCH)" Order="2" />
+    </UI>
+
+    <UIRef Id="WixUI_InstallDir_NoLicense" />
+  </Fragment>
   <?endforeach?>
 
   <Fragment>
-    <UI Id="file WixUI_FeatureTree_NoLicense">
+    <UI Id="file WixUI_InstallDir_NoLicense">
       <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
       <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
       <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
@@ -63,26 +61,29 @@
 
       <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
 
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="CustomizeDlg" Condition="NOT Installed" />
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Condition="NOT Installed" />
       <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="Installed AND PATCH" />
 
-      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="1" Condition="Installed" />
-      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" Condition="NOT Installed" />
-      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="3" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4" />
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1" />
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2" />
 
       <Publish Dialog="BrowseDlg" Control="OK" Event="SetTargetPath" Value="[_BrowseProperty]" Order="3" />
       <Publish Dialog="BrowseDlg" Control="OK" Event="EndDialog" Value="Return" Order="4" />
 
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CustomizeDlg" Order="1" Condition="NOT Installed OR WixUI_InstallMode = &quot;Change&quot;" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1" Condition="NOT Installed" />
       <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2" Condition="Installed AND NOT PATCH" />
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="3" Condition="Installed AND PATCH" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" Condition="Installed AND PATCH" />
 
       <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg" />
 
-      <Publish Dialog="MaintenanceTypeDlg" Control="ChangeButton" Event="NewDialog" Value="CustomizeDlg" />
       <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg" />
       <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg" />
       <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg" />
+
+      <Property Id="ARPNOMODIFY" Value="1" />
     </UI>
 
     <UIRef Id="WixUI_Common" />
