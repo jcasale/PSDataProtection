@@ -10,12 +10,11 @@ using Xunit;
 
 public sealed class IntegrationTests : IDisposable
 {
-    private readonly Runspace runSpace;
     private readonly PowerShell powerShell;
 
     public IntegrationTests()
     {
-        var initialSessionState = InitialSessionState.Create();
+        var initialSessionState = InitialSessionState.CreateDefault2();
 
         var entry1 = new SessionStateCmdletEntry("New-DataProtectionSecret", typeof(NewDataProtectionSecretCommand), null);
         initialSessionState.Commands.Add(entry1);
@@ -23,11 +22,7 @@ public sealed class IntegrationTests : IDisposable
         var entry2 = new SessionStateCmdletEntry("Read-DataProtectionSecret", typeof(ReadDataProtectionSecretCommand), null);
         initialSessionState.Commands.Add(entry2);
 
-        this.runSpace = RunspaceFactory.CreateRunspace(initialSessionState);
-        this.powerShell = PowerShell.Create();
-
-        this.runSpace.Open();
-        this.powerShell.Runspace = this.runSpace;
+        this.powerShell = PowerShell.Create(initialSessionState);
     }
 
     public static TheoryData<string, DataProtectionScope> NewDataProtectionSecretArguments() => new()
@@ -182,9 +177,5 @@ public sealed class IntegrationTests : IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose()
-    {
-        this.powerShell.Dispose();
-        this.runSpace.Dispose();
-    }
+    public void Dispose() => this.powerShell.Dispose();
 }
