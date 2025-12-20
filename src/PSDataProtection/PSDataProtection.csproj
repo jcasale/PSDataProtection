@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <AssemblyName>PSDataProtection</AssemblyName>
     <LangVersion>preview</LangVersion>
     <AnalysisLevel>preview-All</AnalysisLevel>
