@@ -1,18 +1,174 @@
 namespace Tests;
 
-using System;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Security;
 using System.Security.Cryptography;
+
 using PSDataProtection;
-using Xunit;
 
-public sealed class IntegrationTests : IDisposable
+[TestClass]
+public class IntegrationTests
 {
-    private readonly PowerShell powerShell;
+    public static IEnumerable<(string Data, DataProtectionScope Scope)> NewDataProtectionSecretArguments() =>
+    [
+        new(Guid.NewGuid().ToString(), DataProtectionScope.CurrentUser),
+        new(Guid.NewGuid().ToString(), DataProtectionScope.LocalMachine)
+    ];
 
-    public IntegrationTests()
+    [TestMethod]
+    [DynamicData(nameof(NewDataProtectionSecretArguments))]
+    public void ArgumentsAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
+    {
+        using var secureString = data.ToSecureString();
+
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
+
+        var psObject = new PSObject();
+        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.SecureString), secureString));
+        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.Scope), scope));
+
+        var results = powerShell.Invoke<string>(new[] { psObject });
+
+        Assert.ContainsSingle(results);
+
+        Assert.AreEqual(data, results[0]);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(NewDataProtectionSecretArguments))]
+    public void ArgumentsAsParametersShouldPass(string data, DataProtectionScope scope)
+    {
+        using var secureString = data.ToSecureString();
+
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
+
+        var results = powerShell.Invoke<string>();
+
+        Assert.ContainsSingle(results);
+
+        Assert.AreEqual(data, results[0]);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(NewDataProtectionSecretArguments))]
+    public void ResultAsSecureStringShouldPass(string data, DataProtectionScope scope)
+    {
+        using var secureString = data.ToSecureString();
+
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope)
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.AsSecureString), true);
+
+        var results = powerShell.Invoke<SecureString>();
+
+        Assert.ContainsSingle(results);
+
+        Assert.AreEqual(data, results[0].ToPlainString());
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(NewDataProtectionSecretArguments))]
+    public void ScopeInPipelineShouldPass(string data, DataProtectionScope scope)
+    {
+        using var secureString = data.ToSecureString();
+
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
+
+        var results = powerShell.Invoke<string>(new[] { scope });
+
+        Assert.ContainsSingle(results);
+
+        Assert.AreEqual(data, results[0]);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(NewDataProtectionSecretArguments))]
+    public void SecureStringInPipelineShouldPass(string data, DataProtectionScope scope)
+    {
+        using var secureString = data.ToSecureString();
+
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
+
+        var results = powerShell.Invoke<string>(new[] { secureString });
+
+        Assert.ContainsSingle(results);
+
+        Assert.AreEqual(data, results[0]);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(NewDataProtectionSecretArguments))]
+    public void ScopeAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
+    {
+        using var secureString = data.ToSecureString();
+
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
+
+        var psObject = new PSObject();
+        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.Scope), scope));
+
+        var results = powerShell.Invoke<string>(new[] { psObject });
+
+        Assert.ContainsSingle(results);
+
+        Assert.AreEqual(data, results[0]);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(NewDataProtectionSecretArguments))]
+    public void SecureStringAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
+    {
+        using var secureString = data.ToSecureString();
+
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
+
+        var psObject = new PSObject();
+        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.SecureString), secureString));
+
+        var results = powerShell.Invoke<string>(new[] { psObject });
+
+        Assert.ContainsSingle(results);
+
+        Assert.AreEqual(data, results[0]);
+    }
+
+    private static PowerShell CreateInstance()
     {
         var initialSessionState = InitialSessionState.CreateDefault2();
 
@@ -22,160 +178,6 @@ public sealed class IntegrationTests : IDisposable
         var entry2 = new SessionStateCmdletEntry("Read-DataProtectionSecret", typeof(ReadDataProtectionSecretCommand), null);
         initialSessionState.Commands.Add(entry2);
 
-        this.powerShell = PowerShell.Create(initialSessionState);
+        return PowerShell.Create(initialSessionState);
     }
-
-    public static TheoryData<string, DataProtectionScope> NewDataProtectionSecretArguments() => new()
-    {
-        { Guid.NewGuid().ToString(), DataProtectionScope.CurrentUser },
-        { Guid.NewGuid().ToString(), DataProtectionScope.LocalMachine }
-    };
-
-    [Theory]
-    [MemberData(nameof(NewDataProtectionSecretArguments))]
-    public void ArgumentsAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
-    {
-        using var secureString = data.ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
-
-        var psObject = new PSObject();
-        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.SecureString), secureString));
-        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.Scope), scope));
-
-        var results = this.powerShell.Invoke<string>(new[] { psObject });
-
-        Assert.Single(results);
-
-        Assert.Equal(data, results[0]);
-    }
-
-    [Theory]
-    [MemberData(nameof(NewDataProtectionSecretArguments))]
-    public void ArgumentsAsParametersShouldPass(string data, DataProtectionScope scope)
-    {
-        using var secureString = data.ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
-            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
-
-        var results = this.powerShell.Invoke<string>();
-
-        Assert.Single(results);
-
-        Assert.Equal(data, results[0]);
-    }
-
-    [Theory]
-    [MemberData(nameof(NewDataProtectionSecretArguments))]
-    public void ResultAsSecureStringShouldPass(string data, DataProtectionScope scope)
-    {
-        using var secureString = data.ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
-            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope)
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.AsSecureString), true);
-
-        var results = this.powerShell.Invoke<SecureString>();
-
-        Assert.Single(results);
-
-        Assert.Equal(data, results[0].ToPlainString());
-    }
-
-    [Theory]
-    [MemberData(nameof(NewDataProtectionSecretArguments))]
-    public void ScopeInPipelineShouldPass(string data, DataProtectionScope scope)
-    {
-        using var secureString = data.ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
-
-        var results = this.powerShell.Invoke<string>(new[] { scope });
-
-        Assert.Single(results);
-
-        Assert.Equal(data, results[0]);
-    }
-
-    [Theory]
-    [MemberData(nameof(NewDataProtectionSecretArguments))]
-    public void SecureStringInPipelineShouldPass(string data, DataProtectionScope scope)
-    {
-        using var secureString = data.ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
-
-        var results = this.powerShell.Invoke<string>(new[] { secureString });
-
-        Assert.Single(results);
-
-        Assert.Equal(data, results[0]);
-    }
-
-    [Theory]
-    [MemberData(nameof(NewDataProtectionSecretArguments))]
-    public void ScopeAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
-    {
-        using var secureString = data.ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
-
-        var psObject = new PSObject();
-        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.Scope), scope));
-
-        var results = this.powerShell.Invoke<string>(new[] { psObject });
-
-        Assert.Single(results);
-
-        Assert.Equal(data, results[0]);
-    }
-
-    [Theory]
-    [MemberData(nameof(NewDataProtectionSecretArguments))]
-    public void SecureStringAsObjectInPipelineShouldPass(string data, DataProtectionScope scope)
-    {
-        using var secureString = data.ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), scope)
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), scope);
-
-        var psObject = new PSObject();
-        psObject.Members.Add(new PSNoteProperty(nameof(NewDataProtectionSecretCommand.SecureString), secureString));
-
-        var results = this.powerShell.Invoke<string>(new[] { psObject });
-
-        Assert.Single(results);
-
-        Assert.Equal(data, results[0]);
-    }
-
-    /// <inheritdoc />
-    public void Dispose() => this.powerShell.Dispose();
 }

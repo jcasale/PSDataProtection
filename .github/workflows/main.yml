@@ -49,13 +49,15 @@ jobs:
           echo "informationalVersion=$informationalVersion" >> $env:GITHUB_OUTPUT
 
       - name: Run tests
-        run: dotnet.exe test .\src\PSDataProtection.sln --configuration Release --runtime win-x64
+        run: |
+          cd .\src
+          dotnet.exe test --project .\Tests\Tests.csproj --configuration Debug --output Detailed
 
       - name: Clean solution
-        run: dotnet.exe clean .\src\PSDataProtection.sln --configuration Release
+        run: dotnet.exe clean .\src\PSDataProtection.slnx --configuration Release
 
       - name: Build project
-        run: dotnet.exe publish .\src\PSDataProtection\PSDataProtection.csproj --configuration Release --runtime win-x64 --output .\publish
+        run: dotnet.exe publish .\src\PSDataProtection\PSDataProtection.csproj --configuration Release --output .\publish
 
       - name: Prepare release
         run: Remove-Item ./publish/* -Include *.pdb,*.xml -ErrorAction Stop

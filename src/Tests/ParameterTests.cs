@@ -1,17 +1,111 @@
 namespace Tests;
 
-using System;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Security.Cryptography;
+
 using PSDataProtection;
-using Xunit;
 
-public sealed class ParameterTests : IDisposable
+[TestClass]
+public class ParameterTests
 {
-    private readonly PowerShell powerShell;
+    [TestMethod]
+    public void NewDataProtectionSecretWithEmptySecureStringShouldThrow()
+    {
+        using var secureString = string.Empty.ToSecureString();
 
-    public ParameterTests()
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
+
+        var exception = Assert.Throws<Exception>(powerShell.Invoke);
+
+        Assert.IsInstanceOfType<CmdletInvocationException>(exception);
+        Assert.IsInstanceOfType<InvalidOperationException>(exception.InnerException);
+    }
+
+    [TestMethod]
+    public void NewDataProtectionSecretWithInvalidScopeShouldThrow()
+    {
+        using var secureString = Guid.NewGuid().ToString().ToSecureString();
+
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), Guid.NewGuid().ToString());
+
+        var exception = Assert.Throws<Exception>(powerShell.Invoke);
+
+        Assert.IsInstanceOfType<ParameterBindingException>(exception);
+        Assert.IsInstanceOfType<PSInvalidCastException>(exception.InnerException);
+    }
+
+    [TestMethod]
+    public void NewDataProtectionSecretWithInvalidSecureStringShouldThrow()
+    {
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), Guid.NewGuid().ToString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
+
+        var exception = Assert.Throws<Exception>(powerShell.Invoke);
+
+        Assert.IsInstanceOfType<ParameterBindingException>(exception);
+        Assert.IsInstanceOfType<PSInvalidCastException>(exception.InnerException);
+    }
+
+    [TestMethod]
+    public void ReadDataProtectionSecretWithEmptyProtectedStringShouldThrow()
+    {
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Protected), string.Empty)
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
+
+        var exception = Assert.Throws<Exception>(powerShell.Invoke);
+
+        Assert.IsInstanceOfType<ParameterBindingException>(exception);
+        Assert.IsInstanceOfType<ValidationMetadataException>(exception.InnerException);
+    }
+
+    [TestMethod]
+    public void ReadDataProtectionSecretWithInvalidProtectedStringShouldThrow()
+    {
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Protected), Guid.NewGuid())
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
+
+        var exception = Assert.Throws<Exception>(powerShell.Invoke);
+
+        Assert.IsInstanceOfType<CmdletInvocationException>(exception);
+        Assert.IsInstanceOfType<FormatException>(exception.InnerException);
+    }
+
+    [TestMethod]
+    public void ReadDataProtectionSecretWithInvalidScopeShouldThrow()
+    {
+        using var powerShell = CreateInstance();
+        powerShell
+            .AddCommand("New-DataProtectionSecret")
+            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), Guid.NewGuid().ToString())
+            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser)
+            .AddCommand("Read-DataProtectionSecret")
+            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), Guid.NewGuid().ToString());
+
+        var exception = Assert.Throws<Exception>(powerShell.Invoke);
+
+        Assert.IsInstanceOfType<ParameterBindingException>(exception);
+        Assert.IsInstanceOfType<PSInvalidCastException>(exception.InnerException);
+    }
+
+    private static PowerShell CreateInstance()
     {
         var initialSessionState = InitialSessionState.CreateDefault2();
 
@@ -21,99 +115,6 @@ public sealed class ParameterTests : IDisposable
         var entry2 = new SessionStateCmdletEntry("Read-DataProtectionSecret", typeof(ReadDataProtectionSecretCommand), null);
         initialSessionState.Commands.Add(entry2);
 
-        this.powerShell = PowerShell.Create(initialSessionState);
+        return PowerShell.Create(initialSessionState);
     }
-
-    [Fact]
-    public void NewDataProtectionSecretWithEmptySecureStringShouldThrow()
-    {
-        using var secureString = string.Empty.ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
-            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
-
-        var exception = Record.Exception(this.powerShell.Invoke);
-
-        Assert.IsType<CmdletInvocationException>(exception);
-        Assert.IsType<InvalidOperationException>(exception.InnerException);
-    }
-
-    [Fact]
-    public void NewDataProtectionSecretWithInvalidScopeShouldThrow()
-    {
-        using var secureString = Guid.NewGuid().ToString().ToSecureString();
-
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), secureString)
-            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), Guid.NewGuid().ToString());
-
-        var exception = Record.Exception(this.powerShell.Invoke);
-
-        Assert.IsType<ParameterBindingException>(exception);
-        Assert.IsType<PSInvalidCastException>(exception.InnerException);
-    }
-
-    [Fact]
-    public void NewDataProtectionSecretWithInvalidSecureStringShouldThrow()
-    {
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), Guid.NewGuid().ToString())
-            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
-
-        var exception = Record.Exception(this.powerShell.Invoke);
-
-        Assert.IsType<ParameterBindingException>(exception);
-        Assert.IsType<PSInvalidCastException>(exception.InnerException);
-    }
-
-    [Fact]
-    public void ReadDataProtectionSecretWithEmptyProtectedStringShouldThrow()
-    {
-        this.powerShell
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Protected), string.Empty)
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
-
-        var exception = Record.Exception(this.powerShell.Invoke);
-
-        Assert.IsAssignableFrom<ParameterBindingException>(exception);
-        Assert.IsType<ValidationMetadataException>(exception.InnerException);
-    }
-
-    [Fact]
-    public void ReadDataProtectionSecretWithInvalidProtectedStringShouldThrow()
-    {
-        this.powerShell
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Protected), Guid.NewGuid())
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser);
-
-        var exception = Record.Exception(this.powerShell.Invoke);
-
-        Assert.IsType<CmdletInvocationException>(exception);
-        Assert.IsType<FormatException>(exception.InnerException);
-    }
-
-    [Fact]
-    public void ReadDataProtectionSecretWithInvalidScopeShouldThrow()
-    {
-        this.powerShell
-            .AddCommand("New-DataProtectionSecret")
-            .AddParameter(nameof(NewDataProtectionSecretCommand.SecureString), Guid.NewGuid().ToString())
-            .AddParameter(nameof(NewDataProtectionSecretCommand.Scope), DataProtectionScope.CurrentUser)
-            .AddCommand("Read-DataProtectionSecret")
-            .AddParameter(nameof(ReadDataProtectionSecretCommand.Scope), Guid.NewGuid().ToString());
-
-        var exception = Record.Exception(this.powerShell.Invoke);
-
-        Assert.IsType<ParameterBindingException>(exception);
-        Assert.IsType<PSInvalidCastException>(exception.InnerException);
-    }
-
-    /// <inheritdoc />
-    public void Dispose() => this.powerShell.Dispose();
 }

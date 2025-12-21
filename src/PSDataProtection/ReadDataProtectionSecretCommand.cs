@@ -10,10 +10,10 @@ using System.Security.Cryptography;
 [OutputType(typeof(SecureString), ParameterSetName = [SecureStringParameterSetName])]
 public class ReadDataProtectionSecretCommand : PSCmdlet
 {
-    private readonly System.Text.UTF8Encoding encoding = new();
+    private const string StringParameterSetName = "StringOutput";
+    private const string SecureStringParameterSetName = "SecureStringOutput";
 
-    public const string StringParameterSetName = "StringOutput";
-    public const string SecureStringParameterSetName = "SecureStringOutput";
+    private readonly System.Text.UTF8Encoding _encoding = new();
 
     [Parameter(
         Position = 0,
@@ -43,15 +43,16 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
         byte[] bytes;
         try
         {
-            bytes = Convert.FromBase64String(this.Protected);
+            bytes = Convert.FromBase64String(Protected);
         }
         catch (Exception e)
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                e,
-                "Base64DecodingError",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "Base64DecodingError",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -59,15 +60,16 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
         byte[] secret;
         try
         {
-            secret = ProtectedData.Unprotect(bytes, null, this.Scope!.Value);
+            secret = ProtectedData.Unprotect(bytes, null, Scope!.Value);
         }
         catch (Exception e)
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                e,
-                "DecryptionError",
-                ErrorCategory.NotSpecified,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "DecryptionError",
+                    ErrorCategory.NotSpecified,
+                    null));
 
             return;
         }
@@ -75,22 +77,23 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
         string decoded;
         try
         {
-            decoded = this.encoding.GetString(secret);
+            decoded = _encoding.GetString(secret);
         }
         catch (Exception e)
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                e,
-                "DecodingError",
-                ErrorCategory.NotSpecified,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "DecodingError",
+                    ErrorCategory.NotSpecified,
+                    null));
 
             return;
         }
 
         object result;
 
-        switch (this.ParameterSetName)
+        switch (ParameterSetName)
         {
             case StringParameterSetName:
 
@@ -118,9 +121,9 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
 
             default:
 
-                throw new InvalidOperationException($"Unknown parameter set name: \"{this.ParameterSetName}\".");
+                throw new InvalidOperationException($"Unknown parameter set name: \"{ParameterSetName}\".");
         }
 
-        this.WriteObject(result);
+        WriteObject(result);
     }
 }

@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 [OutputType(typeof(string))]
 public class NewDataProtectionSecretCommand : PSCmdlet
 {
-    private readonly System.Text.UTF8Encoding encoding = new();
+    private readonly System.Text.UTF8Encoding _encoding = new();
 
     [Parameter(
         Position = 0,
@@ -35,15 +35,16 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         IntPtr bString;
         try
         {
-            bString = Marshal.SecureStringToBSTR(this.SecureString);
+            bString = Marshal.SecureStringToBSTR(SecureString);
         }
         catch (Exception e)
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                e,
-                "SecureStringToBinaryStringError",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "SecureStringToBinaryStringError",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -55,11 +56,12 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                e,
-                "BinaryStringToManagedStringError",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "BinaryStringToManagedStringError",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -70,11 +72,12 @@ public class NewDataProtectionSecretCommand : PSCmdlet
 
         if (string.IsNullOrWhiteSpace(insecurePassword))
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                new InvalidOperationException("The secure string was empty."),
-                "EmptyPassword",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    new InvalidOperationException("The secure string was empty."),
+                    "EmptyPassword",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -82,15 +85,16 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         byte[] bytes;
         try
         {
-            bytes = this.encoding.GetBytes(insecurePassword);
+            bytes = _encoding.GetBytes(insecurePassword);
         }
         catch (Exception e)
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                e,
-                "BinaryEncodingError",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "BinaryEncodingError",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -98,15 +102,16 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         byte[] secret;
         try
         {
-            secret = ProtectedData.Protect(bytes, null, this.Scope!.Value);
+            secret = ProtectedData.Protect(bytes, null, Scope!.Value);
         }
         catch (Exception e)
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                e,
-                "ProtectionError",
-                ErrorCategory.NotSpecified,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "ProtectionError",
+                    ErrorCategory.NotSpecified,
+                    null));
 
             return;
         }
@@ -118,15 +123,16 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            this.ThrowTerminatingError(new ErrorRecord(
-                e,
-                "Base64EncodingError",
-                ErrorCategory.NotSpecified,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "Base64EncodingError",
+                    ErrorCategory.NotSpecified,
+                    null));
 
             return;
         }
 
-        this.WriteObject(encoded);
+        WriteObject(encoded);
     }
 }
