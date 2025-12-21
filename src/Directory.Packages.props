@@ -5,7 +5,9 @@
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Meziantou.Analyzer" Version="2.0.264" />
     <PackageVersion Include="Microsoft.PowerShell.5.1.ReferenceAssemblies" Version="1.0.0" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.1" />
+    <PackageVersion Include="StyleCop.Analyzers.Unstable" Version="1.2.0.556" />
   </ItemGroup>
 </Project>
