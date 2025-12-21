@@ -10,10 +10,10 @@ using System.Security.Cryptography;
 [OutputType(typeof(SecureString), ParameterSetName = [SecureStringParameterSetName])]
 public class ReadDataProtectionSecretCommand : PSCmdlet
 {
-    private readonly System.Text.UTF8Encoding encoding = new();
-
     public const string StringParameterSetName = "StringOutput";
     public const string SecureStringParameterSetName = "SecureStringOutput";
+
+    private readonly System.Text.UTF8Encoding encoding = new();
 
     [Parameter(
         Position = 0,
