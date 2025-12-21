@@ -39,11 +39,12 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            ThrowTerminatingError(new ErrorRecord(
-                e,
-                "SecureStringToBinaryStringError",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "SecureStringToBinaryStringError",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -55,11 +56,12 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            ThrowTerminatingError(new ErrorRecord(
-                e,
-                "BinaryStringToManagedStringError",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "BinaryStringToManagedStringError",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -70,11 +72,12 @@ public class NewDataProtectionSecretCommand : PSCmdlet
 
         if (string.IsNullOrWhiteSpace(insecurePassword))
         {
-            ThrowTerminatingError(new ErrorRecord(
-                new InvalidOperationException("The secure string was empty."),
-                "EmptyPassword",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    new InvalidOperationException("The secure string was empty."),
+                    "EmptyPassword",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -86,11 +89,12 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            ThrowTerminatingError(new ErrorRecord(
-                e,
-                "BinaryEncodingError",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "BinaryEncodingError",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -102,11 +106,12 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            ThrowTerminatingError(new ErrorRecord(
-                e,
-                "ProtectionError",
-                ErrorCategory.NotSpecified,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "ProtectionError",
+                    ErrorCategory.NotSpecified,
+                    null));
 
             return;
         }
@@ -118,11 +123,12 @@ public class NewDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            ThrowTerminatingError(new ErrorRecord(
-                e,
-                "Base64EncodingError",
-                ErrorCategory.NotSpecified,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "Base64EncodingError",
+                    ErrorCategory.NotSpecified,
+                    null));
 
             return;
         }

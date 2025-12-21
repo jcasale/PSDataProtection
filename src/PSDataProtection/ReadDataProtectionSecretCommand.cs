@@ -47,11 +47,12 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            ThrowTerminatingError(new ErrorRecord(
-                e,
-                "Base64DecodingError",
-                ErrorCategory.InvalidData,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "Base64DecodingError",
+                    ErrorCategory.InvalidData,
+                    null));
 
             return;
         }
@@ -63,11 +64,12 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            ThrowTerminatingError(new ErrorRecord(
-                e,
-                "DecryptionError",
-                ErrorCategory.NotSpecified,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "DecryptionError",
+                    ErrorCategory.NotSpecified,
+                    null));
 
             return;
         }
@@ -79,11 +81,12 @@ public class ReadDataProtectionSecretCommand : PSCmdlet
         }
         catch (Exception e)
         {
-            ThrowTerminatingError(new ErrorRecord(
-                e,
-                "DecodingError",
-                ErrorCategory.NotSpecified,
-                null));
+            ThrowTerminatingError(
+                new(
+                    e,
+                    "DecodingError",
+                    ErrorCategory.NotSpecified,
+                    null));
 
             return;
         }
