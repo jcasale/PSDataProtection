@@ -15,6 +15,9 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v6
@@ -116,5 +119,4 @@ jobs:
         if: github.ref_type == 'tag'
         run: gh.exe release create v${{ steps.version.outputs.fullVersion }} --title v${{ steps.version.outputs.fullVersion }} --notes 'PowerShell data protection module.' ps-data-protection.msi
         env:
-            # Requires a personal access token with a fine-grained permission of contents:read/write.
-            GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
