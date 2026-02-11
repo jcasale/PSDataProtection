@@ -1,4 +1,4 @@
-<Project InitialTargets="GetVersionFromGit" Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
@@ -14,40 +14,51 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" PrivateAssets="All" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <NameModuleManifest>PSDataProtection.psd1</NameModuleManifest>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Update="Debug.ps1">
       <CopyToOutputDirectory Condition="'$(Configuration)'=='DEBUG'">PreserveNewest</CopyToOutputDirectory>
       <CopyToOutputDirectory Condition="'$(Configuration)'!='DEBUG'">Never</CopyToOutputDirectory>
     </None>
-    <None Update="$(NameModuleManifest)" CopyToOutputDirectory="Always" />
-    <Content Update="$(NameModuleManifest)" CopyToPublishDirectory="Always" />
   </ItemGroup>
 
-  <Target Name="GetVersionFromGit">
-    <Exec Command="git.exe describe --tags --long" WorkingDirectory="$(MSBuildProjectDirectory)" ConsoleToMsBuild="true" StandardOutputImportance="Low">
-      <Output TaskParameter="ConsoleOutput" PropertyName="GitTag" />
-    </Exec>
+  <PropertyGroup>
+    <ModuleManifestName>PSDataProtection.psd1</ModuleManifestName>
+  </PropertyGroup>
 
+  <ItemGroup>
+    <Content Update="$(NameModuleManifest)">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="CreateModuleManifest" AfterTargets="SetVersionFromGit" BeforeTargets="BeforeBuild">
     <PropertyGroup>
-      <PatternGitTag>^v(((\d+\.\d+\.\d+\.\d+)(?:-[a-z]+\.\d+)?)-(\d+-g.+))</PatternGitTag>
-      <AssemblyVersion>$([System.Text.RegularExpressions.Regex]::Match($(GitTag), $(PatternGitTag)).Groups[3].Value)</AssemblyVersion>
-      <FileVersion>$([System.Text.RegularExpressions.Regex]::Match($(GitTag), $(PatternGitTag)).Groups[3].Value)</FileVersion>
-      <Version>$([System.Text.RegularExpressions.Regex]::Match($(GitTag), $(PatternGitTag)).Groups[3].Value)</Version>
-      <FullVersion>$([System.Text.RegularExpressions.Regex]::Match($(GitTag), $(PatternGitTag)).Groups[2].Value)</FullVersion>
-      <GitCommitInfo>$([System.Text.RegularExpressions.Regex]::Match($(GitTag), $(PatternGitTag)).Groups[4].Value)</GitCommitInfo>
-      <InformationalVersion>$(FullVersion)+$(GitCommitInfo)</InformationalVersion>
+      <ModuleManifestContent>
+@{
+  RootModule = 'PSDataProtection.dll'
+  ModuleVersion = '$(Version)'
+  GUID = 'fb9ace89-dcc1-4f47-99b3-708753440db3'
+  Author = 'Joseph L. Casale'
+  Description = 'A PowerShell module that utilizes Microsoft Data Protection to encrypt and decrypt secrets.'
+  RequiredAssemblies = @()
+  NestedModules = @()
+  FunctionsToExport = @()
+  CmdletsToExport = @('New-DataProtectionSecret', 'Read-DataProtectionSecret')
+  VariablesToExport = @()
+  AliasesToExport = @()
+  PrivateData = @{ PSData = @{} }
+}
+      </ModuleManifestContent>
     </PropertyGroup>
-
-    <Message Text="*** InformationalVersion $(InformationalVersion)" Importance="high" />
+    <Message Text="Writing PowerShell module manifest to $(ModuleManifestName)." Importance="high" />
+    <WriteLinesToFile File="$(ModuleManifestName)" Overwrite="true" Lines="$(ModuleManifestContent)" />
   </Target>
 
-  <Target Name="CreateModuleManifest" AfterTargets="GetVersionFromGit">
-    <Message Text="*** Writing PowerShell module manifest to $(NameModuleManifest)." Importance="high" />
-    <WriteLinesToFile File="$(NameModuleManifest)" Overwrite="true" Lines="&#xD;&#xA;@{&#xD;&#xA;  RootModule = 'PSDataProtection.dll'&#xD;&#xA;  ModuleVersion = '$(Version)'&#xD;&#xA;  GUID = 'fb9ace89-dcc1-4f47-99b3-708753440db3'&#xD;&#xA;  Author = 'Joseph L. Casale'&#xD;&#xA;  CompanyName = 'Joseph L. Casale'&#xD;&#xA;  Copyright = '(c) Joseph L. Casale. All rights reserved.'&#xD;&#xA;  Description = 'A PowerShell module that utilizes Microsoft Data Protection to encrypt and decrypt secrets.'&#xD;&#xA;  RequiredAssemblies = @()&#xD;&#xA;  NestedModules = @()&#xD;&#xA;  FunctionsToExport = @()&#xD;&#xA;  CmdletsToExport = @('New-DataProtectionSecret', 'Read-DataProtectionSecret')&#xD;&#xA;  VariablesToExport = @()&#xD;&#xA;  AliasesToExport = @()&#xD;&#xA;  PrivateData = @{ PSData = @{} }&#xD;&#xA;}" />
+  <Target Name="IncludeModuleManifest" AfterTargets="CreateModuleManifest" BeforeTargets="BeforeBuild">
+    <ItemGroup>
+      <None Include="$(ModuleManifestName)" CopyToOutputDirectory="Always" />
+    </ItemGroup>
   </Target>
 
 </Project>

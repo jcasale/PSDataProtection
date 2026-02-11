@@ -2,7 +2,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
   xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="PowerShell Data Protection Module" Language="1033" Version="$(var.ProductVersion)" Manufacturer="Joseph L. Casale" UpgradeCode="12d8a258-6fad-4f0e-9f1d-6062ded1e8e9">
-    <SummaryInformation Description="A PowerShell module that utilizes Microsoft Data Protection to encrypt and decrypt secrets." Comments="PSDataProtection v$(var.ProductVersion)" />
+    <SummaryInformation Description="A PowerShell module that utilizes Microsoft Data Protection to encrypt and decrypt secrets." Comments="PSDataProtection $(var.ProductVersionFull)" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <Media Id="1" Cabinet="Data.cab" EmbedCab="yes" CompressionLevel="high" />
 
