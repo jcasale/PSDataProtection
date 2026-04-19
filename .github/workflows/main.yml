@@ -24,18 +24,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup dotnet
-        id: setup-dotnet
-        uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: src/global.json
-
       - name: Setup wix
         run: |
-          dotnet.exe tool install --global wix --version 6.0.2 --verbosity diag
-
-          wix.exe extension add WixToolset.UI.wixext/6.0.2 --global
-          wix.exe extension list --global
+          dotnet tool install wix --version 7.0.0 --global
+          wix eula accept wix7
+          wix extension add WixToolset.UI.wixext/7.0.0
 
       - name: Generate version properties
         id: version
@@ -60,9 +53,6 @@ jobs:
         run: |
           cd .\src
           dotnet.exe test --project .\Tests\Tests.csproj --configuration Release --output Detailed
-
-      - name: Clean solution
-        run: dotnet.exe clean .\src\PSDataProtection.slnx --configuration Release
 
       - name: Publish project
         run: dotnet.exe publish .\src\PSDataProtection\PSDataProtection.csproj --configuration Release --output .\publish
