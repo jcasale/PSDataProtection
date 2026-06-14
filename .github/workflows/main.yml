@@ -60,20 +60,14 @@ jobs:
       - name: Prepare release
         run: Remove-Item ./publish/* -Include *.pdb,*.xml -ErrorAction Stop
 
-      - name: Generate PowerShell help
-        run: |
-          Install-Module -Name platyPS -Force -Confirm:$false -ErrorAction Stop
-          Import-Module ./publish/PSDataProtection.psd1 -ErrorAction Stop
-          Update-MarkdownHelp ./docs -UpdateInputOutput -Force -ErrorAction Stop
-          New-ExternalHelp ./docs -OutputPath ./publish -ErrorAction Stop
-
       - name: Build installer
         run: |
           wix.exe `
             build `
             -arch x64 `
             -src src\Product.wxs `
-            -d ProductSource="$(Resolve-Path ./publish)" `
+            -d ProductSource="$(Resolve-Path .\publish)" `
+            -d HelpSource="$(Resolve-Path .\docs-maml\PSDataProtection)" `
             -d ProductVersion="${{ steps.version.outputs.version }}" `
             -d ProductVersionFull="${{ steps.version.outputs.version-full }}" `
             -ext WixToolset.UI.wixext `
@@ -81,13 +75,6 @@ jobs:
 
       - name: Validate installer
         run: wix.exe msi validate ps-data-protection.msi
-
-      - name: Upload doc artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: docs
-          path: ./docs/
-          if-no-files-found: error
 
       - name: Upload msi artifacts
         uses: actions/upload-artifact@v7
