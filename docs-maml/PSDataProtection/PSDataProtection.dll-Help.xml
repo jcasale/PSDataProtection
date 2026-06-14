@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<helpItems xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" schema="maml" xmlns="http://msh">
+  <command:command>
+    <command:details>
+      <command:name>New-DataProtectionSecret</command:name>
+      <maml:description>
+        <maml:para>Creates an encrypted version of a secret using data protection.</maml:para>
+      </maml:description>
+      <command:verb>New</command:verb>
+      <command:noun>DataProtectionSecret</command:noun>
+    </command:details>
+    <maml:description>
+      <maml:para>The New-DataProtectionSecret cmdlet creates an encrypted version of a secret using data protection.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>New-DataProtectionSecret</maml:name>
+        <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="1" aliases="none">
+          <maml:name>Scope</maml:name>
+          <maml:description>
+            <maml:para>Specifies the scope of the data protection to be applied.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="true">System.Nullable`1[System.Security.Cryptography.DataProtectionScope]</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="0" aliases="none">
+          <maml:name>SecureString</maml:name>
+          <maml:description>
+            <maml:para>Specifies the data to encrypt and encode to a base64 string.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="true">System.Security.SecureString</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="1" aliases="none">
+        <maml:name>Scope</maml:name>
+        <maml:description>
+          <maml:para>Specifies the scope of the data protection to be applied.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="true">System.Nullable`1[System.Security.Cryptography.DataProtectionScope]</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="0" aliases="none">
+        <maml:name>SecureString</maml:name>
+        <maml:description>
+          <maml:para>Specifies the data to encrypt and encode to a base64 string.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="true">System.Security.SecureString</command:parameterValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <dev:name>System.Security.SecureString</dev:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe the data to encrypt and encode to a base64 string.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <dev:name>System.Security.Cryptography.DataProtectionScope</dev:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe the scope of the data protection to be applied.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <dev:name>System.String</dev:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>Returns the protected version of the data.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>--------- ----------- Example 1: Protect a secret using CurrentUser scope ----------- ---------</maml:title>
+        <maml:introduction>
+          <maml:para>```powershell
+PS&gt; $protected = New-DataProtectionSecret -Scope CurrentUser</maml:para>
+          <maml:para>&#x80;</maml:para>
+          <maml:para>cmdlet New-DataProtectionSecret at command pipeline position 1
+Supply values for the following parameters:
+(Type !? for Help.)
+SecureString: ************
+```</maml:para>
+          <maml:para>&#x80;</maml:para>
+          <maml:para>This command protects a secret using CurrentUser scope and prompt for the value securely.</maml:para>
+        </maml:introduction>
+        <dev:code />
+        <dev:remarks />
+      </command:example>
+      <command:example>
+        <maml:title>--------- ----------- Example 2: Store a protected secret on disk ----------- ---------</maml:title>
+        <maml:introduction>
+          <maml:para>Ensure PowerShell is running in the context of the account that will be used to unprotect the secret.</maml:para>
+          <maml:para>&#x80;</maml:para>
+          <maml:para>```powershell
+PS&gt; $protected = New-DataProtectionSecret -Scope CurrentUser</maml:para>
+          <maml:para>&#x80;</maml:para>
+          <maml:para>cmdlet New-DataProtectionSecret at command pipeline position 1
+Supply values for the following parameters:
+(Type !? for Help.)
+SecureString: ************</maml:para>
+          <maml:para>&#x80;</maml:para>
+          <maml:para>PS&gt; [pscustomobject]@{ Protected = $protected; Scope = 'CurrentUser' } |
+    ConvertTo-Json |
+    Set-Content -Path secret.json -Encoding UTF8
+```</maml:para>
+          <maml:para>&#x80;</maml:para>
+          <maml:para>This command stores a protected secret on disk for use by the same account within automation.</maml:para>
+        </maml:introduction>
+        <dev:code />
+        <dev:remarks />
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online Version</maml:linkText>
+        <command:uri />
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command>
+    <command:details>
+      <command:name>Read-DataProtectionSecret</command:name>
+      <maml:description>
+        <maml:para>Reads the unencrypted value of a secret that was encrypted with data protection.</maml:para>
+      </maml:description>
+      <command:verb>Read</command:verb>
+      <command:noun>DataProtectionSecret</command:noun>
+    </command:details>
+    <maml:description>
+      <maml:para>The Read-DataProtectionSecret cmdlet decrypts a secret that was previously encrypted with data protection.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Read-DataProtectionSecret</maml:name>
+        <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="0" aliases="none">
+          <maml:name>Protected</maml:name>
+          <maml:description>
+            <maml:para>Specifies the base64 encoded data to decrypt.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="true">System.String</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="1" aliases="none">
+          <maml:name>Scope</maml:name>
+          <maml:description>
+            <maml:para>Specifies the scope of the data protection to be applied.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="true">System.Nullable`1[System.Security.Cryptography.DataProtectionScope]</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Read-DataProtectionSecret</maml:name>
+        <command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="Named" aliases="none">
+          <maml:name>AsSecureString</maml:name>
+          <maml:description>
+            <maml:para>Specifies the output should be a secure string instead of a string.</maml:para>
+          </maml:description>
+          <command:parameterValue required="false" variableLength="true">System.Management.Automation.SwitchParameter</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="0" aliases="none">
+          <maml:name>Protected</maml:name>
+          <maml:description>
+            <maml:para>Specifies the base64 encoded data to decrypt.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="true">System.String</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="1" aliases="none">
+          <maml:name>Scope</maml:name>
+          <maml:description>
+            <maml:para>Specifies the scope of the data protection to be applied.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="true">System.Nullable`1[System.Security.Cryptography.DataProtectionScope]</command:parameterValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="Named" aliases="none">
+        <maml:name>AsSecureString</maml:name>
+        <maml:description>
+          <maml:para>Specifies the output should be a secure string instead of a string.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="true">System.Management.Automation.SwitchParameter</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="0" aliases="none">
+        <maml:name>Protected</maml:name>
+        <maml:description>
+          <maml:para>Specifies the base64 encoded data to decrypt.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="true">System.String</command:parameterValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="1" aliases="none">
+        <maml:name>Scope</maml:name>
+        <maml:description>
+          <maml:para>Specifies the scope of the data protection to be applied.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="true">System.Nullable`1[System.Security.Cryptography.DataProtectionScope]</command:parameterValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <dev:name>System.String</dev:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe the protected base64 string to unprotect.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <dev:name>System.Security.Cryptography.DataProtectionScope</dev:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>You can pipe the scope of the data protection to be applied.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <dev:name>System.String</dev:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>Returns the unprotected version of the data.</maml:para>
+        </maml:description>
+      </command:returnValue>
+      <command:returnValue>
+        <dev:type>
+          <dev:name>System.Security.SecureString</dev:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>Returns the unprotected version of the data.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para />
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>--------- ----------- Example 1: Unprotect a secret ----------- ---------</maml:title>
+        <maml:introduction>
+          <maml:para>```powershell
+PS&gt; $protected |Read-DataProtectionSecret -Scope CurrentUser
+Hello World!
+```</maml:para>
+          <maml:para>&#x80;</maml:para>
+          <maml:para>This command unprotects a secret that was protected using CurrentUser scope and returns a string.</maml:para>
+        </maml:introduction>
+        <dev:code />
+        <dev:remarks />
+      </command:example>
+      <command:example>
+        <maml:title>--------- ----------- Example 2: Unprotect a secret ----------- ---------</maml:title>
+        <maml:introduction>
+          <maml:para>```powershell
+PS&gt; $secureString = $protected |Read-DataProtectionSecret -Scope CurrentUser -AsSecureString
+```</maml:para>
+          <maml:para>&#x80;</maml:para>
+          <maml:para>This command unprotects a secret that was protected using CurrentUser scope and returns a SecureString.</maml:para>
+        </maml:introduction>
+        <dev:code />
+        <dev:remarks />
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online Version</maml:linkText>
+        <command:uri />
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+</helpItems>
