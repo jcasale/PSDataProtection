@@ -36,7 +36,7 @@ public class IntegrationTests
 
         Assert.ContainsSingle(results);
 
-        Assert.AreEqual(data, results[0]);
+        Assert.AreEqual(data, results[0], StringComparer.Ordinal);
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ public class IntegrationTests
 
         Assert.ContainsSingle(results);
 
-        Assert.AreEqual(data, results[0]);
+        Assert.AreEqual(data, results[0], StringComparer.Ordinal);
     }
 
     [TestMethod]
@@ -79,7 +79,7 @@ public class IntegrationTests
 
         Assert.ContainsSingle(results);
 
-        Assert.AreEqual(data, results[0].ToPlainString());
+        Assert.AreEqual(data, results[0].ToPlainString(), StringComparer.Ordinal);
     }
 
     [TestMethod]
@@ -99,7 +99,7 @@ public class IntegrationTests
 
         Assert.ContainsSingle(results);
 
-        Assert.AreEqual(data, results[0]);
+        Assert.AreEqual(data, results[0], StringComparer.Ordinal);
     }
 
     [TestMethod]
@@ -119,7 +119,7 @@ public class IntegrationTests
 
         Assert.ContainsSingle(results);
 
-        Assert.AreEqual(data, results[0]);
+        Assert.AreEqual(data, results[0], StringComparer.Ordinal);
     }
 
     [TestMethod]
@@ -142,7 +142,7 @@ public class IntegrationTests
 
         Assert.ContainsSingle(results);
 
-        Assert.AreEqual(data, results[0]);
+        Assert.AreEqual(data, results[0], StringComparer.Ordinal);
     }
 
     [TestMethod]
@@ -165,7 +165,7 @@ public class IntegrationTests
 
         Assert.ContainsSingle(results);
 
-        Assert.AreEqual(data, results[0]);
+        Assert.AreEqual(data, results[0], StringComparer.Ordinal);
     }
 
     private static PowerShell CreateInstance()
