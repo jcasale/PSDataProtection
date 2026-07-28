@@ -8,6 +8,8 @@
     <AnalysisLevel>preview-all</AnalysisLevel>
     <MSTestAnalysisMode>all</MSTestAnalysisMode>
     <IsPackable>false</IsPackable>
+    <MSTestParallelizeScope>MethodLevel</MSTestParallelizeScope>
+    <MSTestParallelizeWorkers>0</MSTestParallelizeWorkers>
   </PropertyGroup>
 
   <ItemGroup>
