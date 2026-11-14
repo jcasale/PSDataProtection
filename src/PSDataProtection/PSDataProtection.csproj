@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
@@ -11,6 +11,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.5.1.ReferenceAssemblies" PrivateAssets="All" />
+    <PackageReference Include="MinVer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.Security.Cryptography.ProtectedData" PrivateAssets="All" />
   </ItemGroup>
 
@@ -21,16 +25,39 @@
     </None>
   </ItemGroup>
 
+  <Target Name="CustomizeVersion" DependsOnTargets="MinVer" AfterTargets="MinVer" Condition="'$(DesignTimeBuild)' != 'true' and '$(MinVerSkip)' != 'true'">
+    <Error Condition="'$(MinVerBuildMetadata)' != '' and !$([System.Text.RegularExpressions.Regex]::IsMatch('$(MinVerBuildMetadata)', '^([1-9][0-9]*)$'))" Text="Build metadata must be a positive, nonzero numeric revision without leading zeros." />
+
+    <PropertyGroup>
+      <_Revision>0</_Revision>
+      <_Revision Condition="'$(MinVerBuildMetadata)' != ''">$(MinVerBuildMetadata)</_Revision>
+    </PropertyGroup>
+
+    <Error Condition="$(_Revision) &gt; 65534" Text="Build metadata revision must not exceed 65534." />
+
+    <PropertyGroup>
+      <Version>$(MinVerVersion)</Version>
+      <AssemblyVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).$(_Revision)</AssemblyVersion>
+      <FileVersion>$(AssemblyVersion)</FileVersion>
+      <ModuleVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch)</ModuleVersion>
+      <ProductVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch)</ProductVersion>
+      <ModuleVersion Condition="'$(_Revision)' != '0'">$(AssemblyVersion)</ModuleVersion>
+      <ProductVersion Condition="'$(_Revision)' != '0'">$(AssemblyVersion)</ProductVersion>
+    </PropertyGroup>
+  </Target>
+
   <PropertyGroup>
     <ModuleManifestName>PSDataProtection.psd1</ModuleManifestName>
   </PropertyGroup>
 
-  <Target Name="CreateModuleManifest" AfterTargets="SetVersionFromGit" BeforeTargets="BeforeBuild;AssignTargetPaths">
+  <Target Name="CreateModuleManifest" DependsOnTargets="CustomizeVersion" BeforeTargets="BeforeBuild;AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">
     <PropertyGroup>
+      <!-- IntermediateOutputPath is only finalized after the project body is evaluated, so resolve it here. -->
+      <ModuleManifestPath>$(IntermediateOutputPath)$(ModuleManifestName)</ModuleManifestPath>
       <ModuleManifestContent>
 @{
   RootModule = 'PSDataProtection.dll'
-  ModuleVersion = '$(Version)'
+  ModuleVersion = '$(ModuleVersion)'
   GUID = 'fb9ace89-dcc1-4f47-99b3-708753440db3'
   Author = 'Joseph L. Casale'
   Description = 'A PowerShell module that utilizes Microsoft Data Protection to encrypt and decrypt secrets.'
@@ -44,13 +71,16 @@
 }
       </ModuleManifestContent>
     </PropertyGroup>
-    <Message Text="Writing PowerShell module manifest to $(ModuleManifestName)." Importance="high" />
-    <WriteLinesToFile File="$(ModuleManifestName)" Overwrite="true" Lines="$(ModuleManifestContent)" />
+    <Message Text="Writing PowerShell module manifest to $(ModuleManifestPath)." Importance="high" />
+    <WriteLinesToFile File="$(ModuleManifestPath)" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(ModuleManifestContent)" />
+    <ItemGroup>
+      <FileWrites Include="$(ModuleManifestPath)" />
+    </ItemGroup>
   </Target>
 
   <Target Name="IncludeModuleManifest" AfterTargets="CreateModuleManifest" BeforeTargets="BeforeBuild;AssignTargetPaths">
     <ItemGroup>
-      <None Include="$(ModuleManifestName)" CopyToOutputDirectory="Always" />
+      <None Include="$(ModuleManifestPath)" Link="$(ModuleManifestName)" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
   </Target>
 
