@@ -26,28 +26,60 @@ jobs:
 
       - name: Setup wix
         run: |
-          dotnet tool install wix --version 7.0.0 --global
+          dotnet tool install wix --version 7.0.1 --global
           wix eula accept wix7
-          wix extension add WixToolset.UI.wixext/7.0.0
+          wix extension add WixToolset.UI.wixext/7.0.1
 
       - name: Generate version properties
         id: version
         run: |
-          $pattern = '^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
-          $tag = git.exe describe --tags --abbrev=0
-          $regex = [Text.RegularExpressions.Regex]::Match($tag, $pattern)
-          if (!$regex.Success)
+          Set-StrictMode -Version Latest
+          cd .\src
+          $path = '.\PSDataProtection\PSDataProtection.csproj'
+          dotnet build $path -tl:off -p:MinVerVerbosity=detailed
+
+          $properties = dotnet msbuild $path -target:CustomizeVersion -getProperty:MinVerVersion,MinVerMajor,MinVerMinor,MinVerPatch,ProductVersion,ModuleVersion |
+            ConvertFrom-Json |
+            Select-Object -ExpandProperty Properties
+
+          if ([string]::IsNullOrWhiteSpace($properties.MinVerVersion))
           {
-            throw 'Failed to parse tag.'
+              throw 'Failed to parse the MinVerVersion property.'
           }
 
-          'version={0}.{1}.{2}' -f $regex.Groups['major'].Value, $regex.Groups['minor'].Value, $regex.Groups['patch'].Value |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
-          'version-major={0}' -f $regex.Groups['major'].Value |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
-          'version-minor={0}' -f $regex.Groups['minor'].Value |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
-          'version-patch={0}' -f $regex.Groups['patch'].Value |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
-          'version-prerelease={0}' -f $regex.Groups['prerelease'].Value |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
-          'version-buildmetadata={0}' -f $regex.Groups['buildmetadata'].Value |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
-          'version-full={0}' -f $regex.Groups[0].Value |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          if ([string]::IsNullOrWhiteSpace($properties.MinVerMajor))
+          {
+              throw 'Failed to parse the MinVerMajor property.'
+          }
+
+          if ([string]::IsNullOrWhiteSpace($properties.MinVerMinor))
+          {
+              throw 'Failed to parse the MinVerMinor property.'
+          }
+
+          if ([string]::IsNullOrWhiteSpace($properties.MinVerPatch))
+          {
+              throw 'Failed to parse the MinVerPatch property.'
+          }
+
+          if ([string]::IsNullOrWhiteSpace($properties.ProductVersion))
+          {
+              throw 'Failed to parse the ProductVersion property.'
+          }
+
+          if ([string]::IsNullOrWhiteSpace($properties.ModuleVersion))
+          {
+              throw 'Failed to parse the ModuleVersion property.'
+          }
+
+          @(
+              ('version={0}' -f $properties.MinVerVersion)
+              ('major={0}' -f $properties.MinVerMajor)
+              ('minor={0}' -f $properties.MinVerMinor)
+              ('patch={0}' -f $properties.MinVerPatch)
+              ('productVersion={0}' -f $properties.ProductVersion)
+              ('moduleVersion={0}' -f $properties.ModuleVersion)
+          ) |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Run tests
         run: |
@@ -68,8 +100,8 @@ jobs:
             -src src\Product.wxs `
             -d ProductSource="$(Resolve-Path .\publish)" `
             -d HelpSource="$(Resolve-Path .\docs-maml\PSDataProtection)" `
-            -d ProductVersion="${{ steps.version.outputs.version }}" `
-            -d ProductVersionFull="${{ steps.version.outputs.version-full }}" `
+            -d ProductVersion="${{ steps.version.outputs.productVersion }}" `
+            -d ProductVersionFull="${{ steps.version.outputs.version }}" `
             -ext WixToolset.UI.wixext `
             -out ps-data-protection.msi
 
@@ -96,6 +128,9 @@ jobs:
         run: |
           $PSVersionTable
 
+          Import-Module PSDataProtection -ErrorAction Stop
+          Get-Module PSDataProtection |Select-Object -ExpandProperty Path |Split-Path -Parent |Get-ChildItem -Recurse
+
           $secret = 'Hello World!'
           $secureString = ConvertTo-SecureString $secret -AsPlainText -Force -ErrorAction Stop
           $protected = New-DataProtectionSecret -SecureString $secureString -Scope CurrentUser -ErrorAction Stop
@@ -105,6 +140,6 @@ jobs:
 
       - name: Publish release
         if: github.ref_type == 'tag'
-        run: gh.exe release create ${{ steps.version.outputs.version-full }} --title ${{ steps.version.outputs.version-full }} --notes 'PowerShell data protection module.' ps-data-protection.msi
+        run: gh.exe release create ${{ steps.version.outputs.version }} --title ${{ steps.version.outputs.version }} --notes 'PowerShell data protection module.' ps-data-protection.msi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
